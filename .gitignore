@@ -1,0 +1,33 @@
+# Excel files (don't commit the actual workbook with data)
+*.xlsm
+*.xlsx
+*.xls
+
+# Large CSV/TXT data files
+*.csv
+resenteredon*.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Temporary files
+~$*.xls*
+~$*.doc*
+.DS_Store
+Thumbs.db
+*.tmp
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python scripts (keep documentation only)
+read_excel.py
+read_excel_full.py
+read_sample_data.py

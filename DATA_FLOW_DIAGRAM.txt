@@ -1,0 +1,382 @@
+================================================================
+DATA FLOW DIAGRAM - RESERVATION PROCESSOR
+================================================================
+
+                    OVERALL PROCESS FLOW
+                    ====================
+
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 1: IMPORT CSV DATA                                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  resenteredon102243710-lpo.csv (Tab-delimited)             │
+│                        │                                    │
+│                        ↓                                    │
+│              Data → From Text/CSV                           │
+│                        │                                    │
+│                        ↓                                    │
+│         ┌──────────────────────────┐                       │
+│         │   DELIMITED DATA SHEET   │                       │
+│         │  (35 columns, ~50 rows)  │                       │
+│         └──────────────────────────┘                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+                        ↓ ↓ ↓
+
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 2: RUN MACRO (ALT + F8 → ProcessReservations)        │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────────────┐               │
+│  │  A. FIX SPILLOVER ROWS                  │               │
+│  │     Pattern: "T- ", "S- ", "C- "        │               │
+│  │     Merge with previous row             │               │
+│  │     Delete spillover row                │               │
+│  └─────────────────────────────────────────┘               │
+│                    ↓                                        │
+│  ┌─────────────────────────────────────────┐               │
+│  │  B. LOAD EXISTING RESV IDs              │               │
+│  │     Read Column S from ENTERED ON       │               │
+│  │     Store in Dictionary for fast lookup │               │
+│  └─────────────────────────────────────────┘               │
+│                    ↓                                        │
+│  ┌─────────────────────────────────────────┐               │
+│  │  C. PROCESS EACH ROW                    │               │
+│  │     For each row in DELIMITED DATA:     │               │
+│  │       - Check duplicate RESV_ID         │               │
+│  │       - Split name                      │               │
+│  │       - Calculate TDF                   │               │
+│  │       - Calculate ADR                   │               │
+│  │       - Map columns                     │               │
+│  │       - Add formulas (T, U, V)          │               │
+│  │       - Write to ENTERED ON             │               │
+│  └─────────────────────────────────────────┘               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+                        ↓ ↓ ↓
+
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 3: OUTPUT TO ENTERED ON SHEET                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│         ┌──────────────────────────┐                       │
+│         │    ENTERED ON SHEET      │                       │
+│         │  (22 columns + formulas) │                       │
+│         │   New records appended   │                       │
+│         │   Duplicates skipped     │                       │
+│         └──────────────────────────┘                       │
+│                        │                                    │
+│                        ↓                                    │
+│              Completion Message:                            │
+│         "Records processed: XX"                             │
+│         "Duplicates skipped: XX"                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+================================================================
+COLUMN MAPPING FLOW
+================================================================
+
+DELIMITED DATA SHEET                ENTERED ON SHEET
+(Source)                            (Target)
+────────────────────                ────────────────
+
+Column Q: FULL_NAME        ──┬──→  Column A: FULL_NAME (Last)
+  "LastName,FirstName"       └──→  Column B: FIRST NAME
+
+Column AC: ARRIVAL         ────→   Column C: ARRIVAL
+  Format: Date                     Format: dd/mm/yyyy
+
+Column R: DEPARTURE        ────→   Column D: DEPARTURE
+  Format: Date                     Format: dd/mm/yyyy
+
+Column AD: NIGHTS          ────→   Column E: NIGHTS
+
+Column S: PERSONS          ────→   Column F: PERSONS
+
+Column V: ROOM_CATEGORY    ────→   Column G: ROOM
+
+                           ┌───→   Column H: TDF
+Column V + Column AD       │       [CALCULATED]
+  (Room Type + Nights)     │       1BA: 20/night (max 600)
+                           └───    2BA: 40/night (max 1200)
+
+Column AI: SHARE_AMOUNT    ────→   Column I: NET
+  _PER_STAY
+
+Column I + Column H        ────→   Column J: TOTAL
+  (NET + TDF)                      [CALCULATED]
+
+Column W: RATE_CODE        ────→   Column K: RATE_CODE
+
+Column X: INSERT_USER      ────→   Column L: INSERT_USER
+
+Column AG: C_T_S_NAME      ────→   Column M: C_T_S_NAME
+
+Column AH: SHORT_RESV      ────→   Column N: SHORT_RESV_STATUS
+  _STATUS
+
+Column P / Column E        ────→   Column O: ADR
+  (AMOUNT / NIGHTS)                [CALCULATED]
+
+Column AF: SHARE_AMOUNT    ────→   Column P: AMOUNT
+
+                           ────→   Column Q: COMMENT [blank]
+
+                           ────→   Column R: C=CHECK [blank]
+
+Column M + Column Y        ────→   Column S: RESV ID
+  (RESV_NAME_ID +                  Format: XXXXXXXXDDMMYY
+   INSERT_DATE)
+
+                           ────→   Column T: Season
+                                   [FORMULA: Winter/Summer]
+
+                           ────→   Column U: Booking Lead Time
+                                   [FORMULA: Arrival - Today]
+
+                           ────→   Column V: Events Dates
+                                   [FORMULA: 12 events]
+
+
+================================================================
+TDF CALCULATION LOGIC FLOW
+================================================================
+
+┌─────────────────────────────────────────────────────────┐
+│  Input: Room Category (Column V) + Nights (Column AD)  │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ↓
+              ┌──────────────┐
+              │  Room Type?  │
+              └──────┬───────┘
+                     │
+         ┌───────────┼───────────┐
+         ↓           ↓           ↓
+      ┌────┐      ┌────┐    ┌───────┐
+      │1BA │      │2BA │    │ Other │
+      └──┬─┘      └──┬─┘    └───┬───┘
+         │           │           │
+         ↓           ↓           ↓
+    ┌────────┐  ┌────────┐  ┌───────┐
+    │Nights? │  │Nights? │  │TDF = 0│
+    └───┬────┘  └───┬────┘  └───────┘
+        │           │
+    ┌───┴───┐   ┌───┴───┐
+    ↓       ↓   ↓       ↓
+  ≤30     >30  ≤30     >30
+    │       │   │       │
+    ↓       ↓   ↓       ↓
+  N×20    600  N×40   1200
+    │       │   │       │
+    └───┬───┘   └───┬───┘
+        │           │
+        ↓           ↓
+     ┌──────────────────┐
+     │  TDF = Result    │
+     └──────────────────┘
+
+
+Examples:
+─────────
+1BA, 7 nights   → 7 × 20 = 140 AED
+1BA, 30 nights  → 30 × 20 = 600 AED
+1BA, 45 nights  → 600 AED (capped)
+2BA, 10 nights  → 10 × 40 = 400 AED
+2BA, 35 nights  → 1200 AED (capped)
+ST, 10 nights   → 0 AED (not 1BA/2BA)
+
+
+================================================================
+DUPLICATE CHECK FLOW
+================================================================
+
+For each row in DELIMITED DATA:
+────────────────────────────────
+
+┌─────────────────────────────────────┐
+│ Get RESV_NAME_ID (Col M)            │
+│ Get INSERT_DATE (Col Y)             │
+│ Combine: RESV_ID = ID + DATE        │
+│ Example: 2868967124.11.25           │
+└────────────┬────────────────────────┘
+             │
+             ↓
+      ┌──────────────┐
+      │ RESV_ID in   │
+      │ Dictionary?  │
+      └──────┬───────┘
+             │
+      ┌──────┴──────┐
+      ↓             ↓
+    ┌───┐         ┌───┐
+    │YES│         │NO │
+    └─┬─┘         └─┬─┘
+      │             │
+      ↓             ↓
+┌──────────┐  ┌─────────────┐
+│  SKIP    │  │ PROCESS ROW │
+│  Row     │  │ Add to      │
+│          │  │ ENTERED ON  │
+│ Count++  │  │             │
+└──────────┘  │ Add ID to   │
+              │ Dictionary  │
+              └─────────────┘
+
+
+Result: No duplicates in ENTERED ON sheet!
+
+
+================================================================
+SPILLOVER ROW HANDLING
+================================================================
+
+BEFORE FIX:
+───────────
+Row 182: ... ASL Airlines    TA Connections    24.11.25    2    400
+Row 183: T- TA Connections   CKIN              800          ← SPILLOVER!
+
+Detection:
+─────────
+Row 183, Column A starts with "[Letter]- " pattern
+Matches: "T- ", "S- ", "C- ", etc.
+
+AFTER FIX:
+──────────
+Row 182: ... ASL Airlines TA Connections T- TA Connections
+         24.11.25    2    400    CKIN    800
+
+Row 183: [DELETED]
+
+Actions:
+────────
+1. Detect spillover pattern in Column A
+2. Append Column A value to previous row Column AG
+3. Move Column B to previous row Column AH
+4. Move Column C to previous row Column AI
+5. Delete spillover row
+
+Process: Bottom-up (from last row to first)
+Why? Avoids row number shifting during deletion
+
+
+================================================================
+FORMULA GENERATION
+================================================================
+
+Column T - Season:
+──────────────────
+Input: Arrival (Col C) + Departure (Col D)
+
+Logic:
+  IF arrival OR departure in Oct-Apr → "Winter"
+  ELSE IF arrival OR departure in May-Sep → "Summer"
+  ELSE → ""
+
+Result: "Winter" or "Summer"
+
+
+Column U - Booking Lead Time:
+──────────────────────────────
+Input: Arrival (Col C)
+
+Formula: Arrival Date - TODAY()
+
+Result: Number of days (can be negative if past)
+
+
+Column V - Events Dates:
+────────────────────────
+Input: Arrival (Col C)
+
+Logic: Nested IF checking 12 date ranges
+
+Result: Event name or "" (blank)
+
+Events checked:
+1. Arab Health (26-31 Jan)
+2. Gulf Food (16-21 Feb)
+3. Ramadan (1-29 Mar)
+4. Eid Al Fitr (30 Mar - 2 Apr)
+5. Eid Al Adha (6-9 Jun)
+6. GITEX (12-17 Oct)
+7. Gulf Food Manufacturing (3-7 Nov)
+8. Air Show (16-21 Nov)
+9. Big 5 (23-28 Nov)
+10. National Day Holidays (29 Nov - 2 Dec)
+11. F1 Yas Island (4-7 Dec)
+12. New Year's Eve (26-31 Dec)
+
+
+================================================================
+PERFORMANCE OPTIMIZATION
+================================================================
+
+┌────────────────────────────────────────────────────────┐
+│  BEFORE PROCESSING:                                    │
+│  • Application.ScreenUpdating = False                  │
+│  • Application.Calculation = xlCalculationManual       │
+├────────────────────────────────────────────────────────┤
+│  DURING PROCESSING:                                    │
+│  • Dictionary object for O(1) duplicate lookup         │
+│  • Direct cell writes (no copy-paste)                  │
+│  • Formula strings (not cell references)               │
+│  • Single-pass processing                              │
+├────────────────────────────────────────────────────────┤
+│  AFTER PROCESSING:                                     │
+│  • Application.Calculation = xlCalculationAutomatic    │
+│  • Application.ScreenUpdating = True                   │
+│  • Formulas auto-calculate once                        │
+└────────────────────────────────────────────────────────┘
+
+Result: Fast processing even with 500+ records!
+
+
+================================================================
+ERROR HANDLING
+================================================================
+
+Macro handles these scenarios:
+────────────────────────────────
+
+✓ Missing DELIMITED DATA sheet → Error message, exit
+✓ Missing ENTERED ON sheet → Error message, exit
+✓ Empty DELIMITED DATA → No records processed
+✓ Invalid dates → Handled with On Error Resume Next
+✓ Invalid numbers → Defaults to 0
+✓ Blank RESV_ID → Skips duplicate check, processes row
+✓ Missing columns → Uses Trim() to handle blanks
+
+
+================================================================
+OUTPUT VALIDATION
+================================================================
+
+After macro completes:
+─────────────────────
+
+✓ Check completion message for counts
+✓ Verify new records in ENTERED ON sheet
+✓ Spot-check calculations:
+  - TDF = 20 or 40 × nights (or capped)
+  - TOTAL = NET + TDF
+  - ADR = AMOUNT / NIGHTS
+✓ Verify formulas show values, not text
+✓ Verify dates in dd/mm/yyyy format
+✓ Verify no duplicate RESV IDs
+
+
+================================================================
+                        END OF DIAGRAM
+================================================================
+
+For more information:
+- QUICK_REFERENCE.txt    → Quick guide
+- INSTALLATION_GUIDE.txt → Detailed guide
+- README_FINAL.txt       → Complete overview
+
+================================================================

@@ -1,0 +1,358 @@
+================================================================
+RESERVATION PROCESSOR - INSTALLATION & USAGE GUIDE
+================================================================
+
+FILE: ReservationProcessor_Final.vba
+TARGET: 22-11-2025 Entered On.xlsm
+
+================================================================
+OVERVIEW
+================================================================
+
+This macro processes reservation data from the "DELIMITED DATA" tab
+and adds it to the "ENTERED ON" sheet with proper formatting and
+calculations.
+
+KEY FEATURES:
+- Processes data from DELIMITED DATA to ENTERED ON sheet
+- Calculates TDF (Tourism Dirham Fee): 20 AED (1BA) / 40 AED (2BA) per night
+- Checks for duplicate RESV_ID and skips them
+- Handles spillover rows automatically
+- Maintains date format (dd/mm/yyyy)
+- Adds formulas for Season, Booking Lead Time, and Events Dates
+- Adds extra rooms without ID below existing records
+
+================================================================
+COLUMN MAPPING
+================================================================
+
+DELIMITED DATA → ENTERED ON
+---------------------------
+Column Q (FULL_NAME)          → Column A (FULL_NAME - Last Name)
+                              → Column B (FIRST NAME)
+Column AC (ARRIVAL)           → Column C (ARRIVAL)
+Column R (DEPARTURE)          → Column D (DEPARTURE)
+Column AD (NIGHTS)            → Column E (NIGHTS)
+Column S (PERSONS)            → Column F (PERSONS)
+Column V (ROOM_CATEGORY)      → Column G (ROOM)
+CALCULATED TDF                → Column H (TDF)
+Column AI (SHARE_AMOUNT_PER_STAY) → Column I (NET)
+CALCULATED (NET + TDF)        → Column J (TOTAL)
+Column W (RATE_CODE)          → Column K (RATE_CODE)
+Column X (INSERT_USER)        → Column L (INSERT_USER)
+Column AG (C_T_S_NAME)        → Column M (C_T_S_NAME)
+Column AH (SHORT_RESV_STATUS) → Column N (SHORT_RESV_STATUS)
+CALCULATED (AMOUNT/NIGHTS)    → Column O (ADR)
+Column AF (SHARE_AMOUNT)      → Column P (AMOUNT)
+(blank)                       → Column Q (COMMENT)
+(blank)                       → Column R (C=CHECK)
+Column M+Y (RESV_ID+DATE)     → Column S (RESV ID)
+FORMULA                       → Column T (Season)
+FORMULA                       → Column U (Booking Lead Time)
+FORMULA                       → Column V (Events Dates)
+
+================================================================
+TDF CALCULATION LOGIC
+================================================================
+
+Room Type: 1BA
+- ≤30 nights: 20 AED × nights
+- >30 nights: 600 AED (capped)
+
+Room Type: 2BA
+- ≤30 nights: 40 AED × nights
+- >30 nights: 1200 AED (capped)
+
+Other Room Types: 0 AED
+
+Examples:
+---------
+1BA, 7 nights  = 140 AED
+1BA, 30 nights = 600 AED
+1BA, 45 nights = 600 AED (capped)
+2BA, 10 nights = 400 AED
+2BA, 35 nights = 1200 AED (capped)
+
+================================================================
+DUPLICATE HANDLING
+================================================================
+
+The macro checks Column S (RESV ID) in the ENTERED ON sheet.
+
+RESV ID Format: [RESV_NAME_ID][INSERT_DATE]
+Example: 2868967124.11.25
+
+If RESV_ID exists:
+- The record is SKIPPED
+- A counter tracks skipped duplicates
+
+If RESV_ID is blank or new:
+- The record is ADDED
+- Placed at the next available row
+
+================================================================
+FORMULAS ADDED
+================================================================
+
+Column T - Season:
+------------------
+=IF(OR(AND(ISNUMBER(C2), OR(MONTH(C2)<=4, MONTH(C2)>=10)),
+    AND(ISNUMBER(D2), OR(MONTH(D2)<=4, MONTH(D2)>=10))),
+    "Winter",
+    IF(OR(AND(ISNUMBER(C2), MONTH(C2)>=5, MONTH(C2)<=9),
+        AND(ISNUMBER(D2), MONTH(D2)>=5, MONTH(D2)<=9)),
+        "Summer", ""))
+
+Logic: Winter = Oct-Apr, Summer = May-Sep
+
+Column U - Booking Lead Time:
+------------------------------
+=IF(ISNUMBER(C2), C2 - TODAY(), "")
+
+Logic: Days between arrival and today
+
+Column V - Events Dates:
+------------------------
+Checks if arrival falls within these event periods:
+- Arab Health: 26-31 Jan 2025
+- Gulf Food: 16-21 Feb 2025
+- Ramadan: 1-29 Mar 2025
+- Eid Al Fitr: 30 Mar - 2 Apr 2025
+- Eid Al Adha: 6-9 Jun 2025
+- GITEX: 12-17 Oct 2025
+- Gulf Food Manufacturing: 3-7 Nov 2025
+- Air Show: 16-21 Nov 2025
+- Big 5: 23-28 Nov 2025
+- National Day Holidays: 29 Nov - 2 Dec 2025
+- F1 Yas Island: 4-7 Dec 2025
+- New Year's Eve: 26-31 Dec 2025
+
+================================================================
+INSTALLATION - METHOD 1: MANUAL IMPORT
+================================================================
+
+1. Open "22-11-2025 Entered On.xlsm"
+
+2. Press ALT + F11 to open VBA Editor
+
+3. In VBA Editor:
+   - Go to File → Import File
+   - Navigate to "ReservationProcessor_Final.vba"
+   - Click "Open"
+
+4. Close VBA Editor (ALT + Q)
+
+5. Save the workbook (CTRL + S)
+
+================================================================
+INSTALLATION - METHOD 2: COPY-PASTE
+================================================================
+
+1. Open "ReservationProcessor_Final.vba" in Notepad
+
+2. Select All (CTRL + A) and Copy (CTRL + C)
+
+3. Open "22-11-2025 Entered On.xlsm"
+
+4. Press ALT + F11 to open VBA Editor
+
+5. In VBA Editor:
+   - Go to Insert → Module
+   - Paste the code (CTRL + V)
+
+6. Close VBA Editor (ALT + Q)
+
+7. Save the workbook (CTRL + S)
+
+================================================================
+HOW TO USE
+================================================================
+
+PREREQUISITE:
+- Import CSV data into "DELIMITED DATA" sheet first
+  (You can copy from resenteredon102243710-lpo.csv)
+
+STEPS:
+1. Open "22-11-2025 Entered On.xlsm"
+
+2. Make sure "DELIMITED DATA" sheet has data
+
+3. Press ALT + F8 (Macro dialog)
+
+4. Select "ProcessReservations"
+
+5. Click "Run"
+
+6. Wait for processing (may take 10-30 seconds)
+
+7. Review the summary message:
+   - Records processed
+   - Duplicates skipped
+
+8. Check "ENTERED ON" sheet for new records
+
+================================================================
+SPILLOVER ROW HANDLING
+================================================================
+
+Some rows in the CSV have data that spills to the next line.
+
+Pattern: Rows starting with "T- ", "S- ", "C- " etc.
+
+Example:
+Row 1: ... ASL Airlines    TA Connections    24.11.25
+Row 2: T- TA Connections   CKIN              800
+
+The macro automatically:
+1. Detects spillover pattern
+2. Merges Row 2 data into Row 1
+3. Deletes the spillover row
+
+This happens automatically before processing!
+
+================================================================
+IMPORTING CSV TO DELIMITED DATA SHEET
+================================================================
+
+If you need to import the CSV file:
+
+1. Open "22-11-2025 Entered On.xlsm"
+
+2. Go to "DELIMITED DATA" sheet
+
+3. Clear existing data (optional)
+
+4. Go to Data → From Text/CSV
+
+5. Select "resenteredon102243710-lpo.csv"
+
+6. In import wizard:
+   - Delimiter: Tab
+   - File Origin: UTF-8
+   - Click "Load"
+
+7. Data will appear in DELIMITED DATA sheet
+
+8. Run the macro (ALT + F8 → ProcessReservations)
+
+================================================================
+TROUBLESHOOTING
+================================================================
+
+Error: "DELIMITED DATA sheet not found"
+→ Make sure the sheet is named exactly "DELIMITED DATA"
+
+Error: "ENTERED ON sheet not found"
+→ Make sure the sheet is named exactly "ENTERED ON"
+
+No data processed / 0 records:
+→ Check that DELIMITED DATA has data starting from row 2
+→ Check that column headers match expected format
+
+All records skipped as duplicates:
+→ The RESV IDs already exist in ENTERED ON sheet
+→ To reprocess, clear ENTERED ON sheet (keep headers)
+
+Wrong TDF amounts:
+→ Check that room categories are "1BA" or "2BA" (exact match)
+→ Other formats will result in 0 TDF
+
+Formulas not working:
+→ Make sure Excel calculation is set to Automatic
+→ Go to Formulas → Calculation Options → Automatic
+
+Date format wrong:
+→ The macro sets format to "dd/mm/yyyy"
+→ Check Windows regional settings if issues persist
+
+================================================================
+TESTING
+================================================================
+
+To test the macro:
+
+1. Backup your file first!
+
+2. Clear ENTERED ON sheet (keep row 1 headers)
+
+3. Add a few test rows to DELIMITED DATA
+
+4. Run the macro
+
+5. Verify:
+   ✓ Names split correctly
+   ✓ Dates in dd/mm/yyyy format
+   ✓ TDF calculated correctly
+   ✓ NET + TDF = TOTAL
+   ✓ ADR = AMOUNT / NIGHTS
+   ✓ Formulas in columns T, U, V
+   ✓ No duplicate RESV IDs
+
+================================================================
+PERFORMANCE
+================================================================
+
+Processing speed depends on:
+- Number of records (typical: 50-500 records)
+- Computer speed
+- Excel version
+
+Expected performance:
+- 50 records: ~2-5 seconds
+- 200 records: ~10-15 seconds
+- 500 records: ~30-45 seconds
+
+The macro uses:
+- Screen updating disabled
+- Manual calculation mode
+- Dictionary for fast duplicate checking
+
+================================================================
+MAINTENANCE
+================================================================
+
+To update event dates (Column V):
+1. Open VBA Editor (ALT + F11)
+2. Find "AddEventsFormula" function
+3. Update DATE values for your events
+4. Save and close
+
+To change TDF rates:
+1. Open VBA Editor (ALT + F11)
+2. Find "CalculateTDF" function
+3. Update the rates (currently 20 for 1BA, 40 for 2BA)
+4. Update caps (currently 600 for 1BA, 1200 for 2BA)
+5. Save and close
+
+================================================================
+SUPPORT
+================================================================
+
+If you encounter issues:
+1. Check that all sheet names match exactly
+2. Verify column headers in DELIMITED DATA
+3. Test with a small dataset first
+4. Check VBA code is properly imported
+5. Ensure macros are enabled
+
+================================================================
+VERSION INFORMATION
+================================================================
+
+Version: 1.0 Final
+Date: 2025-11-24
+Macro File: ReservationProcessor_Final.vba
+Target File: 22-11-2025 Entered On.xlsm
+
+Features:
+✓ TDF calculation
+✓ Duplicate RESV_ID checking
+✓ Spillover row handling
+✓ Date format preservation
+✓ Name splitting
+✓ Season formula
+✓ Lead time formula
+✓ Events formula
+✓ Performance optimized
+
+================================================================

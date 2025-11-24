@@ -1,0 +1,192 @@
+================================================================
+QUICK REFERENCE GUIDE - RESERVATION PROCESSOR
+================================================================
+
+INSTALLATION (Choose One Method)
+================================
+
+METHOD 1 - Import VBA File:
+   1. Open 22-11-2025 Entered On.xlsm
+   2. ALT + F11
+   3. File → Import File → Select ReservationProcessor_Final.vba
+   4. ALT + Q (close VBA Editor)
+   5. CTRL + S (save)
+
+METHOD 2 - Copy-Paste:
+   1. Open ReservationProcessor_Final.vba in Notepad
+   2. CTRL + A, CTRL + C
+   3. Open 22-11-2025 Entered On.xlsm
+   4. ALT + F11
+   5. Insert → Module
+   6. CTRL + V
+   7. ALT + Q, CTRL + S
+
+USAGE
+=====
+
+1. Import CSV to "DELIMITED DATA" sheet
+2. ALT + F8
+3. Select "ProcessReservations"
+4. Click "Run"
+5. Wait for completion message
+
+COLUMN MAPPING CHEAT SHEET
+===========================
+
+Source (DELIMITED DATA)    → Target (ENTERED ON)
+-------------------------     -------------------
+Q: FULL_NAME               → A: Last Name + B: First Name
+AC: ARRIVAL                → C: ARRIVAL (dd/mm/yyyy)
+R: DEPARTURE               → D: DEPARTURE (dd/mm/yyyy)
+AD: NIGHTS                 → E: NIGHTS
+S: PERSONS                 → F: PERSONS
+V: ROOM_CATEGORY           → G: ROOM
+[CALCULATED]               → H: TDF
+AI: SHARE_AMOUNT_PER_STAY  → I: NET
+[CALCULATED]               → J: TOTAL (NET + TDF)
+W: RATE_CODE               → K: RATE_CODE
+X: INSERT_USER             → L: INSERT_USER
+AG: C_T_S_NAME             → M: C_T_S_NAME
+AH: SHORT_RESV_STATUS      → N: SHORT_RESV_STATUS
+[CALCULATED]               → O: ADR (AMOUNT/NIGHTS)
+AF: SHARE_AMOUNT           → P: AMOUNT
+M+Y: RESV_ID + DATE        → S: RESV ID
+
+FORMULAS
+========
+
+Column T (Season):
+  Winter = Oct-Apr
+  Summer = May-Sep
+
+Column U (Booking Lead Time):
+  = Arrival Date - Today
+
+Column V (Events Dates):
+  Arab Health (26-31 Jan)
+  Gulf Food (16-21 Feb)
+  Ramadan (1-29 Mar)
+  Eid Al Fitr (30 Mar - 2 Apr)
+  Eid Al Adha (6-9 Jun)
+  GITEX (12-17 Oct)
+  Gulf Food Manufacturing (3-7 Nov)
+  Air Show (16-21 Nov)
+  Big 5 (23-28 Nov)
+  National Day Holidays (29 Nov - 2 Dec)
+  F1 Yas Island (4-7 Dec)
+  New Year's Eve (26-31 Dec)
+
+TDF CALCULATION
+===============
+
+1BA: 20 AED/night (max 600 AED for 30+ nights)
+2BA: 40 AED/night (max 1200 AED for 30+ nights)
+Others: 0 AED
+
+Examples:
+  1BA × 7 nights = 140 AED
+  1BA × 30 nights = 600 AED
+  1BA × 45 nights = 600 AED (capped)
+  2BA × 10 nights = 400 AED
+  2BA × 40 nights = 1200 AED (capped)
+
+DUPLICATE HANDLING
+==================
+
+RESV ID = RESV_NAME_ID + INSERT_DATE
+Example: 2868967124.11.25
+
+If RESV ID exists in ENTERED ON → SKIP
+If RESV ID is new or blank → ADD
+
+COMMON SHORTCUTS
+================
+
+ALT + F8       Open Macros dialog
+ALT + F11      Open VBA Editor
+CTRL + S       Save workbook
+ALT + Q        Close VBA Editor
+CTRL + Home    Go to cell A1
+CTRL + End     Go to last used cell
+
+TROUBLESHOOTING
+===============
+
+Issue: No data processed
+Fix: Check DELIMITED DATA has data from row 2
+
+Issue: All skipped as duplicates
+Fix: RESV IDs already exist; clear ENTERED ON to reprocess
+
+Issue: Wrong TDF
+Fix: Room category must be exactly "1BA" or "2BA"
+
+Issue: Dates wrong format
+Fix: Macro sets dd/mm/yyyy; check regional settings
+
+Issue: Formulas not working
+Fix: Formulas → Calculation Options → Automatic
+
+KEYBOARD SHORTCUTS IN MACRO
+============================
+
+The macro is fully automated - no user interaction needed during processing.
+
+Before running:
+✓ Backup file
+✓ Check DELIMITED DATA has data
+✓ Check column headers match
+
+After running:
+✓ Review completion message
+✓ Check new records in ENTERED ON
+✓ Verify calculations (spot check)
+
+TESTING CHECKLIST
+=================
+
+□ Names split correctly (Last Name, First Name)
+□ Dates in dd/mm/yyyy format
+□ TDF calculated correctly for 1BA/2BA
+□ NET + TDF = TOTAL
+□ ADR = AMOUNT ÷ NIGHTS
+□ Season formula working
+□ Lead Time formula working
+□ Events formula working
+□ No duplicate RESV IDs added
+□ Spillover rows handled
+
+PERFORMANCE
+===========
+
+~50 records: 2-5 seconds
+~200 records: 10-15 seconds
+~500 records: 30-45 seconds
+
+Optimizations enabled:
+- Screen updating OFF during processing
+- Calculation mode = Manual during processing
+- Dictionary for fast duplicate lookup
+
+FILES REQUIRED
+==============
+
+✓ 22-11-2025 Entered On.xlsm (target workbook)
+✓ ReservationProcessor_Final.vba (macro code)
+✓ resenteredon102243710-lpo.csv (source data)
+
+IMPORT CSV QUICK STEPS
+======================
+
+1. Go to DELIMITED DATA sheet
+2. Data → From Text/CSV
+3. Select resenteredon102243710-lpo.csv
+4. Delimiter: Tab
+5. File Origin: UTF-8
+6. Load
+
+Then run macro!
+
+================================================================
+For detailed information, see INSTALLATION_GUIDE.txt
+================================================================

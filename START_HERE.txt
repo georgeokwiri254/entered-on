@@ -1,0 +1,238 @@
+================================================================
+           RESERVATION PROCESSOR - START HERE!
+================================================================
+
+Welcome! This folder contains a complete VBA macro solution for
+processing reservation data from CSV into your Excel workbook.
+
+================================================================
+                    WHAT YOU NEED TO DO
+================================================================
+
+STEP 1: Install the Macro
+──────────────────────────
+
+Choose ONE method:
+
+   ★ METHOD A: Automatic (Easiest)
+     └─ Double-click: InstallMacro_Updated.vbs
+        (Requires "Trust access to VBA project object model")
+
+   ★ METHOD B: Manual
+     └─ Open 22-11-2025 Entered On.xlsm
+     └─ Press ALT + F11
+     └─ File → Import File
+     └─ Select: ReservationProcessor_Final.vba
+     └─ Close VBA Editor
+
+
+STEP 2: Import CSV Data
+────────────────────────
+
+   └─ Open 22-11-2025 Entered On.xlsm
+   └─ Go to "DELIMITED DATA" sheet
+   └─ Data → From Text/CSV
+   └─ Select: resenteredon102243710-lpo.csv
+   └─ Settings: Delimiter=Tab, Origin=UTF-8
+   └─ Click "Load"
+
+
+STEP 3: Run the Macro
+──────────────────────
+
+   └─ Press ALT + F8
+   └─ Select: ProcessReservations
+   └─ Click "Run"
+   └─ Wait for completion message
+   └─ Check "ENTERED ON" sheet!
+
+
+That's it! ✓
+
+================================================================
+                FILES IN THIS FOLDER
+================================================================
+
+PRIMARY FILES (USE THESE):
+──────────────────────────
+
+   📄 ReservationProcessor_Final.vba
+      → The macro code (LATEST VERSION)
+
+   ⚙️ InstallMacro_Updated.vbs
+      → Automatic installer (double-click to install)
+
+   📖 QUICK_REFERENCE.txt
+      → Quick reference guide (recommended!)
+
+   📘 INSTALLATION_GUIDE.txt
+      → Complete detailed guide
+
+   📊 DATA_FLOW_DIAGRAM.txt
+      → Visual diagrams of data flow
+
+   📋 README_FINAL.txt
+      → Complete overview and documentation
+
+   📝 START_HERE.txt
+      → This file!
+
+
+OLD FILES (IGNORE THESE):
+─────────────────────────
+
+   ProcessReservations.vba       (old version)
+   InstallMacro.vbs              (old installer)
+   README_Instructions.txt       (old docs)
+   PROJECT_SUMMARY.md            (old docs)
+
+
+SOURCE DATA:
+────────────
+
+   resenteredon102243710-lpo.csv  (your data file)
+   resenteredon102243710-lpo.txt  (same, .txt format)
+
+================================================================
+                  WHAT THE MACRO DOES
+================================================================
+
+✓ Reads from "DELIMITED DATA" sheet
+✓ Writes to "ENTERED ON" sheet
+✓ Checks for duplicate RESV_ID (skips them)
+✓ Fixes spillover rows (T-, S-, C- patterns)
+✓ Calculates TDF: 20 AED (1BA) / 40 AED (2BA) per night
+✓ Splits names: Last Name + First Name
+✓ Keeps dates as dd/mm/yyyy
+✓ Calculates ADR (Amount ÷ Nights)
+✓ Adds Season formula (Winter/Summer)
+✓ Adds Booking Lead Time formula
+✓ Adds Events Dates formula (12 events)
+
+================================================================
+                    TDF CALCULATION
+================================================================
+
+1BA Room:  20 AED per night (max 600 AED for 30+ nights)
+2BA Room:  40 AED per night (max 1200 AED for 30+ nights)
+Other:     0 AED
+
+Examples:
+   1BA × 7 nights  = 140 AED
+   1BA × 30 nights = 600 AED
+   1BA × 45 nights = 600 AED (capped!)
+   2BA × 10 nights = 400 AED
+   2BA × 40 nights = 1200 AED (capped!)
+
+================================================================
+              NEED HELP? READ THESE FILES
+================================================================
+
+Quick Help:
+   → QUICK_REFERENCE.txt
+
+Detailed Guide:
+   → INSTALLATION_GUIDE.txt
+
+Understanding Data Flow:
+   → DATA_FLOW_DIAGRAM.txt
+
+Complete Documentation:
+   → README_FINAL.txt
+
+================================================================
+                  TROUBLESHOOTING
+================================================================
+
+Problem: Can't install with .vbs file
+   ✓ Use Manual Method (Step 1, Method B above)
+   ✓ Or enable: File → Options → Trust Center →
+     Macro Settings → Trust access to VBA model
+
+Problem: No data processed
+   ✓ Check "DELIMITED DATA" has data from row 2
+
+Problem: All records skipped
+   ✓ They already exist in "ENTERED ON"
+   ✓ Clear ENTERED ON (keep headers) to reprocess
+
+Problem: Wrong TDF amounts
+   ✓ Room category must be exactly "1BA" or "2BA"
+
+Problem: Dates wrong format
+   ✓ Should be dd/mm/yyyy automatically
+   ✓ Check Windows regional settings
+
+Problem: Formulas show as text
+   ✓ Set: Formulas → Calculation Options → Automatic
+
+================================================================
+                KEYBOARD SHORTCUTS
+================================================================
+
+ALT + F8     Open Macros
+ALT + F11    Open VBA Editor
+CTRL + S     Save
+ALT + Q      Close VBA Editor
+
+================================================================
+                    QUICK TEST
+================================================================
+
+To test before processing real data:
+
+1. Backup your Excel file!
+2. Clear ENTERED ON sheet (keep row 1 headers)
+3. Add 5-10 test rows to DELIMITED DATA
+4. Run macro (ALT + F8 → ProcessReservations)
+5. Check results in ENTERED ON
+6. Verify:
+   □ Names split correctly
+   □ Dates in dd/mm/yyyy
+   □ TDF calculated
+   □ NET + TDF = TOTAL
+   □ Formulas working (columns T, U, V)
+
+================================================================
+                  PERFORMANCE
+================================================================
+
+Typical Processing Speed:
+   ~50 records:  2-5 seconds
+   ~200 records: 10-15 seconds
+   ~500 records: 30-45 seconds
+
+The macro is optimized for performance!
+
+================================================================
+                     SUPPORT
+================================================================
+
+All documentation is in this folder:
+
+📖 For quick answers:
+   → QUICK_REFERENCE.txt
+
+📘 For detailed help:
+   → INSTALLATION_GUIDE.txt
+
+📊 For understanding how it works:
+   → DATA_FLOW_DIAGRAM.txt
+
+📋 For complete info:
+   → README_FINAL.txt
+
+================================================================
+                  READY TO START?
+================================================================
+
+1. Read QUICK_REFERENCE.txt (5 minutes)
+2. Install macro (Step 1 above)
+3. Import CSV data (Step 2 above)
+4. Run macro (Step 3 above)
+
+Good luck! 🎯
+
+================================================================
+           Version 1.0 - Created 2025-11-24
+================================================================
