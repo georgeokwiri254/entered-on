@@ -1,0 +1,81 @@
+# Search Validation Rules Configuration
+# Format: CTS_NAME|CHECK_TYPE|MESSAGE|COLUMN_TO_CHECK|EXPECTED_VALUE
+#
+# CTS_NAME: Match against Column M (C_T_S_NAME) - can be partial match
+# CHECK_TYPE: ATTACHMENT, VALUE_MATCH, CONTAINS, REMINDER
+# MESSAGE: What to show in popup
+# COLUMN_TO_CHECK: Column letter (optional, depends on CHECK_TYPE)
+# EXPECTED_VALUE: What to look for (optional, depends on CHECK_TYPE)
+#
+# Lines starting with # are comments and ignored
+
+# Webbeds - Check for VCC attachment
+WEBBEDS|REMINDER|1. Is VCC attached?||
+
+# Traveltino - Check for VCC attachment
+TRAVELTINO|REMINDER|1. Is VCC attached?||
+
+# Holiday Moments - Check for HB and LPO match
+HOLIDAY MOMENTS|REMINDER|1. Is HB confirmed? 2. Does it match original LPO?||
+
+# Miracle - Check for HB and LPO match
+MIRACLE|REMINDER|1. Is HB confirmed? 2. Does it match original LPO?||
+
+# GRP (Group bookings) - Check if rate code starts with GRP and total matches invoice
+GRP|REMINDER|1. Does total match invoice? 2. Does rate code in Column K start with GRP?||
+
+# Expedia - Check HB rate code
+EXPEDIA|REMINDER|1. Is HB rate code verified?||
+
+# Booking.com - Check HB rate code
+BOOKING|REMINDER|1. Is HB rate code verified?||
+
+# ===== T- PREFIX CTS NAMES (Travel Agents) =====
+
+T- Adonis Tourism L.L|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Agoda.com Company|REMINDER|1. Is HB Rate Code verified?||
+T- Al Khalidiah Touri|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- All Travel Dubai|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- ALMOSAFER INTERNAT|REMINDER|1. Is total amount verified?||
+T- Anex Tourism World|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Arabian Oryx Trave|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Booking.com|REMINDER|1. Is HB rate code verified?||
+T- BTB TOURISM LLC|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- CR7 Wonders Touris|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Dar Al Hana Touris|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Darina Holidays|REMINDER|1. Is number of nights verified?||
+T- Desert Adventures|REMINDER|1. Is rate breakdown verified? 2. Does it match original LPO?||
+T- Desert Gate Touris|REMINDER|1. Is rate breakdown verified? 2. Does it match original LPO?||
+T- Duri Travel|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Elevate Tourism L.|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Expedia|REMINDER|1. Is HB rate code verified?||
+T- FCM SINGAPORE PTE|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Fun and Sun Touris|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Gulf Circle Tours|REMINDER|1. Are comments checked? 2. Is TDF to TA verified?||
+T- Holiday Moments|REMINDER|1. Is HB confirmed? 2. Does it match original LPO?||
+T- Holidays Tours LLC|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Hotelbeds DMCC|REMINDER|1. Is booking confirmed? 2. Are payment details verified?||
+T- HRS Hotel Reservat|REMINDER|1. Is booking confirmed?||
+T- Joyce Tours|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Kalamaki Travel Se|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Kalanit Tours Duba|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Kurban Tours/ DMC|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Lamar Holidays|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Luxec Tourism|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Mahfouz Tourism LL|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Miracle Tourism LL|REMINDER|1. Is HB confirmed? 2. Does it match original LPO?||
+T- Noah's Ark Tourism|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Odeon Travel & Tou|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Oriental Routes To|REMINDER|1. Are comments checked?||
+T- PHOENIQ TRAVEL AGE|REMINDER|1. Is booking confirmed?||
+T- Rayna Tourism L.L.|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Rocket Destination|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Rustar Tourism|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Satguru Travel and|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Sharaf Tours Trave|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Skymax Holidays c/|REMINDER|1. Is invoice sent? 2. Is trace there?||
+T- Splendid Travel &|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- TA Connections|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- Traveltino|REMINDER|1. Is VCC attached?||
+T- Voyage Tours|REMINDER|1. Is payment link sent? 2. Is trace there?||
+T- WebBeds|REMINDER|1. Is VCC attached?||
